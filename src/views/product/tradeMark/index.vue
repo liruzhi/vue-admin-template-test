@@ -140,7 +140,9 @@ export default {
       //row:当前用户选中的品牌信息
       console.log(row);
       this.dialogFormVisible = true;
-      this.tmForm = row;
+      //this.tmForm = row;
+      //这里需要浅拷贝，否则会修改列表页的数据
+      this.tmForm = { ...row };
     },
     handleAvatarSuccess(res, file) {
       // this.imageUrl = URL.createObjectURL(file.raw);
@@ -167,11 +169,14 @@ export default {
       let result = await this.$API.trademark.reqAddOrUpdateTradeMark(
         this.tmForm
       );
-      console.log(result);
+
       if (result.code == 200) {
         //弹出信息
-        this.$message(this.tmForm.id ? "修改品牌成功" : "添加品牌成功");
-        this.getPageList();
+        this.$message({
+          message: this.tmForm.id ? "修改品牌成功" : "添加品牌成功",
+          type: "success",
+        });
+        this.getPageList(this.tmForm.id ? this.page : 1);
       }
     },
   },

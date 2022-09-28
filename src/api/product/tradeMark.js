@@ -11,7 +11,7 @@ export const reqTradeMarkList = (page, limit) =>
 //更新品牌  /admin/product/baseTrademark/update put
 
 export const reqAddOrUpdateTradeMark = (tradeMark) => {
-  if (tradeMark.id) {
+  if (!tradeMark.id) {
     return request({
       url: `/admin/product/baseTrademark/save`,
       method: "post",
