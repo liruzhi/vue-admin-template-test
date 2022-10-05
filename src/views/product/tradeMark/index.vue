@@ -31,7 +31,11 @@
             >修改</el-button
           >
 
-          <el-button type="danger" icon="el-icon-delete" size="mini"
+          <el-button
+            type="danger"
+            icon="el-icon-delete"
+            size="mini"
+            @click="deleteTradeMark(row)"
             >删除</el-button
           >
         </template>
@@ -55,13 +59,18 @@
     <!-- 对话框 
     :visible.sync 控制对话框显示与隐藏
     -->
-    <el-dialog title="添加品牌" :visible.sync="dialogFormVisible">
-      <!-- form表单 -->
-      <el-form style="width: 80%" :model="tmForm">
-        <el-form-item label="品牌名称" label-width="100px">
+    <el-dialog
+      :title="tmForm.id ? '修改品牌' : '添加品牌'"
+      :visible.sync="dialogFormVisible"
+    >
+      <!-- form表单 
+        Form 组件提供了表单验证的功能，只需要通过 rules 属性传入约定的验证规则，并将 Form-Item 的 prop 属性设置为需校验的字段名即可。校验规则参见 async-validator
+      -->
+      <el-form style="width: 80%" :model="tmForm" :rules="rules" ref="ruleForm">
+        <el-form-item label="品牌名称" label-width="100px" prop="tmName">
           <el-input autocomplete="off" v-model="tmForm.tmName"></el-input>
         </el-form-item>
-        <el-form-item label="品牌Logo" label-width="100px">
+        <el-form-item label="品牌Logo" label-width="100px" prop="logoUrl">
           <!-- 这里手机数据不能使用v-model，因为不是表单元素
             action：设置图片上传的地址,路由需要增加dev-api前缀，这里注意下。
            -->
@@ -106,6 +115,23 @@ export default {
         tmName: "",
         logoUrl: "",
       },
+      //表单验证规则
+      rules: {
+        //品牌名称的验证规则
+        tmName: [
+          { required: true, message: "请输入品牌名称", trigger: "blur" },
+          {
+            min: 2,
+            max: 10,
+            message: "长度为 2 到 10 个字符",
+            trigger: "change",
+          },
+        ],
+        //品牌的logo验证规则
+        logoUrl: [
+          { required: true, message: "请选择品牌图片", trigger: "change" },
+        ],
+      },
     };
   },
   //组件挂载完毕发请求
@@ -138,12 +164,12 @@ export default {
     //修改品牌
     updateTradeMark(row) {
       //row:当前用户选中的品牌信息
-      console.log(row);
       this.dialogFormVisible = true;
       //this.tmForm = row;
       //这里需要浅拷贝，否则会修改列表页的数据
       this.tmForm = { ...row };
     },
+
     handleAvatarSuccess(res, file) {
       // this.imageUrl = URL.createObjectURL(file.raw);
       //收集表单图片的数据，将来需要带给服务器
@@ -163,21 +189,31 @@ export default {
       return isJPG && isLt2M;
     },
     //添加品牌或修改品牌
-    async addOrUpdateTradeMark() {
-      this.dialogFormVisible = false;
-      //发送请求
-      let result = await this.$API.trademark.reqAddOrUpdateTradeMark(
-        this.tmForm
-      );
+    addOrUpdateTradeMark() {
+      this.$refs.ruleForm.validate(async (success) => {
+        if (success) {
+          this.dialogFormVisible = false;
+          //发送请求
+          let result = await this.$API.trademark.reqAddOrUpdateTradeMark(
+            this.tmForm
+          );
 
-      if (result.code == 200) {
-        //弹出信息
-        this.$message({
-          message: this.tmForm.id ? "修改品牌成功" : "添加品牌成功",
-          type: "success",
-        });
-        this.getPageList(this.tmForm.id ? this.page : 1);
-      }
+          if (result.code == 200) {
+            //弹出信息
+            this.$message({
+              message: this.tmForm.id ? "修改品牌成功" : "添加品牌成功",
+              type: "success",
+            });
+            this.getPageList(this.tmForm.id ? this.page : 1);
+          }
+        } else {
+          console.log("error submit!");
+          return false;
+        }
+      });
+    },
+    deleteTradeMark(row) {
+      console.log(row);
     },
   },
 };
