@@ -213,7 +213,33 @@ export default {
       });
     },
     deleteTradeMark(row) {
-      console.log(row);
+      // console.log(row);
+      this.$confirm(`你确定删除${row.tmName}?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async() => {
+          // reqDeleteTradeMark
+         let result = await this.$API.trademark.reqDeleteTradeMark(row.id);
+          //如果删除成功
+          if (result.code == 200) {
+            //当用户点击确定按钮时会触发
+            this.$message({
+              type: "success",
+              message: "删除成功!",
+            });
+            this.getPageList(this.list.length > 1? this.page: this.page - 1)
+          }
+
+        })
+        .catch(() => {
+          //当用户点击取消按钮的时候会触发
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
   },
 };
