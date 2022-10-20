@@ -109,7 +109,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-button type="primary">保存</el-button>
+        <el-button type="primary" @click="addOrUpdateAttr">保存</el-button>
         <el-button @click="isShowTable = true">取消</el-button>
       </div>
     </el-card>
@@ -246,6 +246,11 @@ export default {
     deleteAttrValue(index) {
       //当前删除属性的操作不需要发送请求
       this.attrInfo.attrValueList.splice(index, 1);
+    },
+
+    //保存按钮：进行添加属性或者修改属性的操作
+    addOrUpdateAttr() {
+      //整理参数
     },
   },
 };
