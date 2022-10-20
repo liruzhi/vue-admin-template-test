@@ -219,9 +219,9 @@ export default {
         cancelButtonText: "取消",
         type: "warning",
       })
-        .then(async() => {
+        .then(async () => {
           // reqDeleteTradeMark
-         let result = await this.$API.trademark.reqDeleteTradeMark(row.id);
+          let result = await this.$API.trademark.reqDeleteTradeMark(row.id);
           //如果删除成功
           if (result.code == 200) {
             //当用户点击确定按钮时会触发
@@ -229,9 +229,8 @@ export default {
               type: "success",
               message: "删除成功!",
             });
-            this.getPageList(this.list.length > 1? this.page: this.page - 1)
+            this.getPageList(this.list.length > 1 ? this.page : this.page - 1);
           }
-
         })
         .catch(() => {
           //当用户点击取消按钮的时候会触发
