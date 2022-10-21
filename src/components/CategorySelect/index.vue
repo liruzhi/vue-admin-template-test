@@ -7,6 +7,7 @@
           placeholder="请选择"
           v-model="cForm.category1Id"
           @change="handler1"
+          :disabled="needDisable"
         >
           <!-- <el-option label="区域一" value="shanghai"></el-option> -->
           <el-option
@@ -23,6 +24,7 @@
           placeholder="请选择"
           v-model="cForm.category2Id"
           @change="handler2"
+          :disabled="needDisable"
         >
           <el-option
             :label="c2.name"
@@ -38,6 +40,7 @@
           placeholder="请选择"
           v-model="cForm.category3Id"
           @change="handler3"
+          :disabled="needDisable"
         >
           <el-option
             :label="c3.name"
@@ -54,6 +57,7 @@
 <script>
 export default {
   name: "CategorySelect",
+  props: ["needDisable"],
   data() {
     return {
       //一级分类的数据

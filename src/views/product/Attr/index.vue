@@ -1,7 +1,10 @@
 <template>
   <div>
     <el-card style="margin: 20px 0px">
-      <CategorySelect @getCategoryId="getCategoryId" />
+      <CategorySelect
+        @getCategoryId="getCategoryId"
+        :needDisable="!isShowTable"
+      />
     </el-card>
     <el-card>
       <div v-show="isShowTable">
@@ -109,7 +112,12 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-button type="primary" @click="addOrUpdateAttr">保存</el-button>
+        <el-button
+          type="primary"
+          @click="addOrUpdateAttr"
+          :disabled="attrInfo.attrValueList.length < 1"
+          >保存</el-button
+        >
         <el-button @click="isShowTable = true">取消</el-button>
       </div>
     </el-card>
@@ -143,8 +151,11 @@ export default {
     getCategoryId({ categoryId, level }) {
       if (level == 1) {
         this.category1Id = categoryId;
+        this.category2Id = "";
+        this.category3Id = "";
       } else if (level == 2) {
         this.category2Id = categoryId;
+        this.category3Id = "";
       } else {
         //代表三级分类的id有了
         this.category3Id = categoryId;
@@ -249,8 +260,33 @@ export default {
     },
 
     //保存按钮：进行添加属性或者修改属性的操作
-    addOrUpdateAttr() {
-      //整理参数
+    async addOrUpdateAttr() {
+      //整理参数:1 属性值为空的不应该提交
+      //2 提交的数据中不应该出现flag
+      this.attrInfo.attrValueList = this.attrInfo.attrValueList.filter(
+        (item) => {
+          //筛选出属性值不是空的
+          if (item.valueName != "") {
+            delete item.flag;
+            return true;
+          }
+        }
+      );
+
+      try {
+        //发送请求
+        let result = await this.$API.attr.reqAddOrUpdateAttr(this.attrInfo);
+        console.log(result);
+        //展示平台属性的信号量进行切换
+        this.isShowTable = true;
+        //提示消息
+        this.$message({ type: "success", message: "保存成功" });
+        //保存成功以后再次获取平台属性进行展示
+        this.getAttrList();
+      } catch (error) {
+        console.log(error);
+        this.$message("保存失败");
+      }
     },
   },
 };
