@@ -67,7 +67,7 @@
         >
         </el-pagination>
       </div>
-      <SpuForm v-show="scene == 1" />
+      <SpuForm v-show="scene == 1" @changeScene="changeScene" ref="spu" />
       <SkuForm v-show="scene == 2" />
     </el-card>
   </div>
@@ -119,8 +119,6 @@ export default {
       //请求列表
       let result = await this.$API.spu.reqSpuList(page, limit, category3Id);
 
-      console.log(result);
-
       if (result.code == 200) {
         this.total = result.data.total;
         this.records = result.data.records;
@@ -137,6 +135,13 @@ export default {
     //修改某一个spu
     updateSpu(row) {
       this.scene = 1;
+      //获取子组件SpuForm
+      //在父组件中可以通过$ref获取子组件等
+      this.$refs.spu.initSpuData(row);
+    },
+
+    changeScene(scene) {
+      this.scene = scene;
     },
   },
   //注册组件
