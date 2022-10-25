@@ -3,7 +3,7 @@
     <el-card style="margin: 20px 0">
       <CategorySelect
         @getCategoryId="getCategoryId"
-        :needDisable="needDisable"
+        :needDisable="scene != 0"
       />
     </el-card>
     <el-card>
@@ -31,6 +31,7 @@
                 icon="el-icon-plus"
                 size="mini"
                 title="添加sku"
+                @click="addSku(row)"
               ></hint-button>
               <hint-button
                 type="warning"
@@ -45,12 +46,21 @@
                 size="mini"
                 title="查看当前spu全部sku列表"
               ></hint-button>
-              <hint-button
-                type="danger"
-                icon="el-icon-delete"
-                size="mini"
-                title="删除spu"
-              ></hint-button>
+
+              <!-- slot="reference"必须有 -->
+              <!-- 由于版本问题，这里不是文档中写的confirm，而是onConfirm -->
+              <el-popconfirm
+                title="这是一段内容确定删除吗？"
+                @onConfirm="deleteSpu(row)"
+              >
+                <hint-button
+                  type="danger"
+                  icon="el-icon-delete"
+                  size="mini"
+                  title="删除spu"
+                  slot="reference"
+                ></hint-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -68,7 +78,7 @@
         </el-pagination>
       </div>
       <SpuForm v-show="scene == 1" @changeScene="changeScene" ref="spu" />
-      <SkuForm v-show="scene == 2" />
+      <SkuForm v-show="scene == 2" ref="sku" />
     </el-card>
   </div>
 </template>
@@ -131,6 +141,8 @@ export default {
     //添加Spu的回调
     addSpu() {
       this.scene = 1;
+      //通知子组件spuForm发请求：1获取品牌 2获取销售属性
+      this.$refs.spu.addSpuData(this.category3Id);
     },
     //修改某一个spu
     updateSpu(row) {
@@ -140,8 +152,28 @@ export default {
       this.$refs.spu.initSpuData(row);
     },
 
-    changeScene(scene) {
+    changeScene({ scene, flag }) {
       this.scene = scene;
+      if (flag == "修改") {
+        this.getSpuList(this.page);
+      } else {
+        this.getSpuList();
+      }
+    },
+    //删除spu
+    async deleteSpu(row) {
+      let result = await this.$API.spu.reqDeleteSpu(row.id);
+      if (result.code == 200) {
+        this.$message({ type: "success", message: "删除成功" });
+        this.getSpuList(this.records.length > 1 ? this.page : this.page - 1);
+      }
+    },
+    //添加sku
+    addSku(row) {
+      //切换场景为2
+      this.scene = 2;
+      //父组件调用子组件的方法，让子组件发请求
+      this.$refs.sku.getData(this.category1Id, this.category2Id, row);
     },
   },
   //注册组件

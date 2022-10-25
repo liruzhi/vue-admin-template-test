@@ -77,9 +77,10 @@
               <!--   @close="handleClose(tag)" -->
               <el-tag
                 :key="tag.id"
-                v-for="tag in row.spuSaleAttrValueList"
+                v-for="(tag, index) in row.spuSaleAttrValueList"
                 closable
                 :disable-transitions="false"
+                @close="row.spuSaleAttrValueList.splice(index, 1)"
               >
                 {{ tag.saleAttrValueName }}
               </el-tag>
@@ -91,10 +92,15 @@
                 v-model="row.inputValue"
                 ref="saveTagInput"
                 size="small"
+                @blur="handleInputConfirm(row)"
               >
               </el-input>
               <!-- @click="showInput" -->
-              <el-button v-else class="button-new-tag" size="small"
+              <el-button
+                v-else
+                class="button-new-tag"
+                size="small"
+                @click="addSaleAttrValue(row)"
                 >添加</el-button
               >
             </template>
@@ -105,6 +111,7 @@
                 type="danger"
                 icon="el-icon-delete"
                 size="mini"
+                @click="spu.spuSaleAttrList.splice($index, 1)"
               ></el-button>
             </template>
           </el-table-column>
@@ -112,8 +119,8 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary">保存</el-button>
-        <el-button @click="$emit('changeScene', 0)">取消</el-button>
+        <el-button type="primary" @click="addOrUpdateSpu">保存</el-button>
+        <el-button @click="cancel">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -136,7 +143,7 @@ export default {
         //spu名称
         spuName: "",
         //品牌id
-        tmId: 0,
+        tmId: "",
         //id: 0,
         //收集SPU图片的信息
         spuImageList: [
@@ -238,6 +245,87 @@ export default {
 
       this.spu.spuSaleAttrList.push(newSaleAttr);
       this.attrIdAndAttrName = "";
+    },
+    addSaleAttrValue(row) {
+      this.$set(row, "inputVisible", true);
+      //通过响应式数据inputValue字段收集新增的销售属性
+      this.$set(row, "inputValue", "");
+    },
+    //el-input失去焦点的事件
+    handleInputConfirm(row) {
+      //结构出销售属性当中收集数据
+      const { baseSaleAttrId, inputValue } = row;
+
+      //判断新增的值
+      if (inputValue.trim() == "") {
+        this.$message("属性值不能为空");
+        return;
+      }
+
+      //不能重复,此处也可以用some函数
+      let isRepeat = row.spuSaleAttrValueList.every(
+        (item) => item.saleAttrValueName == inputValue
+      );
+
+      if (isRepeat) {
+        this.$message("属性值不能重复");
+        return;
+      }
+      //新增的属性值 kv一致，省略v
+      let newSaleAttrValue = { baseSaleAttrId, saleAttrValueName: inputValue };
+
+      row.spuSaleAttrValueList.push(newSaleAttrValue);
+
+      row.inputVisible = false;
+    },
+    //保存按钮的回调
+    async addOrUpdateSpu() {
+      //整理参数：需要整理照片墙的数据
+      //携带参数：对于图片，需要携带imageName,imageUrl字段
+      this.spu.spuImageList = this.spuImageList.map((item) => {
+        return {
+          //注意：此处是imgName、imgUrl不是imageName、imageUrl
+          imgName: item.name,
+          imgUrl: (item.response && item.response.data) || item.url,
+        };
+      });
+
+      //发请求
+      let result = await this.$API.spu.reqAddOrUpdateSpu(this.spu);
+
+      if (result.code == 200) {
+        this.$message({ type: "success", message: "保存成功" });
+        //通知父组件，回到场景0
+        this.$emit("changeScene", {
+          scene: 0,
+          flag: this.spu.id ? "修改" : "添加",
+        });
+      }
+      //清除数据
+      Object.assign(this._data, this.$options.data());
+    },
+    //点击添加SPU按钮的时候，发请求的函数
+    async addSpuData(category3Id) {
+      this.spu.category3Id = category3Id;
+      //获取品牌数据
+      let tradeMarkResult = await this.$API.spu.reqTrademarkList();
+      if (tradeMarkResult.code == 200) {
+        this.tradeMarkList = tradeMarkResult.data;
+      }
+
+      //获取平台全部的销售属性
+      let saleReuslt = await this.$API.spu.reqBaseSaleAttrList();
+      if (saleReuslt.code == 200) {
+        this.saleAttrList = saleReuslt.data;
+      }
+    },
+    //取消按钮
+    cancel() {
+      //通知父组件切换场景为0
+      this.$emit("changeScene", { scene: 0 });
+      //清理数据
+      //Object.assign:es6中新增的方法
+      Object.assign(this._data, this.$options.data());
     },
   },
   computed: {
