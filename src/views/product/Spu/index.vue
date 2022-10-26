@@ -45,6 +45,7 @@
                 icon="el-icon-info"
                 size="mini"
                 title="查看当前spu全部sku列表"
+                @click="handler(row)"
               ></hint-button>
 
               <!-- slot="reference"必须有 -->
@@ -78,8 +79,31 @@
         </el-pagination>
       </div>
       <SpuForm v-show="scene == 1" @changeScene="changeScene" ref="spu" />
-      <SkuForm v-show="scene == 2" ref="sku" />
+      <SkuForm v-show="scene == 2" ref="sku" @changeScenes="changeScenes" />
     </el-card>
+    <el-dialog
+      :title="`${spu.spuName}的sku列表`"
+      :visible.sync="dialogTableVisible"
+      :before-close="close"
+    >
+      <el-table :data="skuList" style="width: 100%" border v-loading="loading">
+        <el-table-column prop="skuName" label="名称" width="width">
+        </el-table-column>
+        <el-table-column prop="price" label="价格" width="width">
+        </el-table-column>
+        <el-table-column prop="weight" label="重量" width="width">
+        </el-table-column>
+        <el-table-column label="默认图片" width="width">
+          <template slot-scope="{ row, $index }">
+            <img
+              :src="row.skuDefaultImg"
+              style="width: 100px; height: 100px"
+              alt=""
+            />
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -101,6 +125,10 @@ export default {
       records: [],
       total: 0, //分页器一共需要展示数据的条数
       scene: 0, //0-代表展示SPU列表 1-添加SPU|修改SPU 2-添加SKU
+      dialogTableVisible: false,
+      spu: {},
+      skuList: [],
+      loading: true,
     };
   },
   methods: {
@@ -174,6 +202,27 @@ export default {
       this.scene = 2;
       //父组件调用子组件的方法，让子组件发请求
       this.$refs.sku.getData(this.category1Id, this.category2Id, row);
+    },
+
+    //skuForm通知父组件修改场景
+    changeScenes(scene) {
+      this.scene = scene;
+    },
+    //查看sku的按钮的回调
+    async handler(spu) {
+      this.dialogTableVisible = true;
+      this.spu = spu;
+      //获取sku列表的数据进行展示
+      let result = await this.$API.sku.reqSkuList(spu.id);
+      if (result.code == 200) {
+        this.skuList = result.data;
+      }
+      this.loading = false;
+    },
+    close(done) {
+      this.loading = true;
+      this.skuList = [];
+      done();
     },
   },
   //注册组件
