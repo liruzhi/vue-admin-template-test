@@ -1,0 +1,48 @@
+{
+  "salesTotal": 13451,
+  "salesToday": 11,
+  "salesGrowthLastDay": -19.16,
+  "salesGrowthLastMonth": 56.67,
+
+  "visitTotal": 88460,
+  "visitToday": 88460,
+  "visitTrend": [610, 432, 557, 789, 965, 123, 776],
+  "payTotal": 18976,
+  "payRate": 60.2,
+  "payTotal": 18976,
+  "payTrend": [986, 123, 689, 789, 657, 332, 90],
+
+  "activityRate": 78,
+  "activityGrowLastDay": -17.7,
+  "activityGrowLastMonth": 47.12,
+
+  "orderFullYearAxis": [
+    "1月",
+    "2月",
+    "3月",
+    "4月",
+    "5月",
+    "6月",
+    "7月",
+    "8月",
+    "9月",
+    "10月",
+    "11月",
+    "12月"
+  ],
+  "orderFullYear": [410, 82, 220, 310, 430, 660, 786, 533, 410, 321, 559, 410],
+  "userFullYearAxis": [
+    "1月",
+    "2月",
+    "3月",
+    "4月",
+    "5月",
+    "6月",
+    "7月",
+    "8月",
+    "9月",
+    "10月",
+    "11月",
+    "12月"
+  ]
+}
