@@ -85,6 +85,7 @@
 <script>
 import * as echarts from "echarts";
 import dayjs from "dayjs";
+import { mapState } from "vuex";
 export default {
   name: "Sale",
   data() {
@@ -131,8 +132,13 @@ export default {
     title() {
       return this.activeName == "sale" ? "销售额" : "访问量";
     },
+    ...mapState({
+      listState: (state) => state.home.list,
+    }),
   },
   mounted() {
+    console.log(this.title);
+    console.log(this.listState.orderFullYear);
     //初始化echarts实例
     this.mycharts = echarts.init(this.$refs.charts);
     this.mycharts.setOption({
@@ -155,18 +161,18 @@ export default {
         {
           type: "category",
           data: [
-            "1月",
-            "2月",
-            "3月",
-            "4月",
-            "5月",
-            "6月",
-            "7月",
-            "8月",
-            "9月",
-            "10月",
-            "11月",
-            "12月",
+            // "1月",
+            // "2月",
+            // "3月",
+            // "4月",
+            // "5月",
+            // "6月",
+            // "7月",
+            // "8月",
+            // "9月",
+            // "10月",
+            // "11月",
+            // "12月",
           ],
           axisTick: {
             alignWithLabel: true,
@@ -183,8 +189,11 @@ export default {
           name: "Direct",
           type: "bar",
           barWidth: "60%",
-          data: [10, 52, 200, 334, 390, 330, 220, 110, 150, 480, 370, 90],
-          color: "yellowGreen",
+          data: [
+            // 10, 52, 200, 334, 390, 330, 220, 110, 150, 480, 370, 90
+          ],
+          // color: "yellowGreen",
+          // color: this.title == "销售额" ? "green" : "blue",
         },
       ],
     });
@@ -196,6 +205,54 @@ export default {
         title: {
           text: this.title + "趋势",
         },
+        xAxis: [
+          {
+            data:
+              this.title == "销售额"
+                ? this.listState.orderFullYearAxis
+                : this.listState.userFullYearAxis,
+          },
+        ],
+        series: [
+          {
+            name: "Direct",
+            type: "bar",
+            barWidth: "60%",
+            data:
+              this.title == "销售额"
+                ? this.listState.orderFullYear
+                : this.listState.userFullYear,
+            color: this.title == "销售额" ? "green" : "blue",
+          },
+        ],
+      });
+    },
+
+    listState() {
+      this.mycharts.setOption({
+        title: {
+          text: this.title + "趋势",
+        },
+        xAxis: [
+          {
+            data:
+              this.title == "销售额"
+                ? this.listState.orderFullYearAxis
+                : this.listState.userFullYearAxis,
+          },
+        ],
+        series: [
+          {
+            name: "Direct",
+            type: "bar",
+            barWidth: "60%",
+            data:
+              this.title == "销售额"
+                ? this.listState.orderFullYear
+                : this.listState.userFullYear,
+            color: this.title == "销售额" ? "green" : "blue",
+          },
+        ],
       });
     },
   },
@@ -207,7 +264,9 @@ export default {
 .el-card__header {
   border-bottom: none;
 }
+</style>
 
+<style scoped>
 .header-slot {
   position: relative;
   display: flex;

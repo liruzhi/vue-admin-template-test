@@ -36,7 +36,9 @@ module.exports = {
       warnings: false,
       errors: true,
     },
-    // before: require('./mock/mock-server.js')
+    //开启mock数据，使用before登录会超时
+    // before: require("./mock/mock-server.js"),
+    after: require("./mock/mock-server.js"),
     //配置代理跨域
     // https://webpack.docschina.org/configuration/dev-server/#devserverproxy
     proxy: {

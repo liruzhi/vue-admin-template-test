@@ -132,6 +132,9 @@ export default {
     barChart,
     progressChart,
   },
+  mounted() {
+    this.$store.dispatch("getData");
+  },
 };
 </script>
 
